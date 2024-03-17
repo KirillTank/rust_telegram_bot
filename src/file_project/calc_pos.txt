@@ -1,0 +1,89 @@
+use std::{fmt::Display, fs::OpenOptions, io::{Write, stdin}};
+
+const PATH_LOG: &str = "logs.txt";
+
+fn main(){
+    calc();
+}
+
+fn calc(){
+    println!("Добро пожаловать в мою программу");
+
+    println!("введите курс который интересен вам в цифрах");
+    let curs: f64 = revers();
+
+    println!("напишите цену");
+    let mut price: f64 = revers();
+    
+    loop {
+        println!("хотите добавить еше сумму, если нет пишите 0");
+        let a: f64 = revers();
+        
+        if a == 0.0 {
+            break;
+        } else {
+            price += a;
+        }
+    }
+
+    price *= curs;
+    println!("Хотите посчитать цену за груз 1-да/2-нет" );
+    let mut price_bag = revers();
+    
+    match price_bag {
+        1.0 => {
+            println!("введите цену за груз в любой валюте");
+            price_bag = revers();
+            println!("введите курс валюты");
+            let mut a = revers();
+            price_bag *= a;
+            println!("введите сколько кг груз");
+            a = revers();
+            price_bag *= a;
+        },
+        _ => { price_bag = 0.0; }
+    }
+
+    price += price_bag;
+    println!("выходит что цена: {}", price)
+}
+
+fn revers() -> f64 {
+    let num: f64 = connsole_read()
+        .unwrap()
+        .parse()
+        .unwrap_or_else(|e|{
+                logs(&e);
+                0.0
+            });
+    num
+}
+
+fn connsole_read() -> Option<String> {
+    let mut input = String::new();
+    
+    match stdin().read_line(&mut input) {
+        Ok(_) => {
+            Some(input.trim().to_string())
+        },
+        Err(e) => {
+            logs(&e);
+            None
+        },
+    }
+}
+
+    
+fn logs<T: Display>(err: &T) {
+    let mut f = OpenOptions::new()
+        .append(true)
+        .create(true)
+        .open(PATH_LOG)
+        .expect("error opening/creating file");
+
+    let e = format!("{}\n", err);
+
+    if let Err(e) = f.write_all(e.as_bytes()) {
+        eprintln!("Error writing to file: {}", e);
+    }
+}
